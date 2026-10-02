@@ -21,6 +21,10 @@ const COLORES: Record<EstadoEspacio, { caja: string; punto: string }> = {
     caja: "border-violet-500/70 bg-violet-500/12 hover:bg-violet-500/20",
     punto: "bg-violet-400",
   },
+  sin_datos: {
+    caja: "border-slate-400/50 bg-slate-400/10 hover:bg-slate-400/20",
+    punto: "bg-slate-300",
+  },
 };
 
 const FILTROS: { valor: EstadoEspacio | "todos"; etiqueta: string }[] = [
@@ -29,6 +33,7 @@ const FILTROS: { valor: EstadoEspacio | "todos"; etiqueta: string }[] = [
   { valor: "ocupado", etiqueta: "Ocupados" },
   { valor: "reservado", etiqueta: "Reservados" },
   { valor: "mantenimiento", etiqueta: "Mantenimiento" },
+  { valor: "sin_datos", etiqueta: "Sin datos" },
 ];
 
 interface Props {

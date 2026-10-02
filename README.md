@@ -13,7 +13,9 @@ Identidad visual institucional: azul EMI + amarillo oro.
 | Framework | Next.js 16 (App Router, RSC, Server Actions) |
 | UI | React 19 + Tailwind CSS v4 |
 | Datos / Auth | Supabase (`@supabase/ssr`, OAuth con Google) |
+| Base de datos | PostgreSQL 16 en Supabase, 24 tablas, 8 vistas, 13 funciones |
 | Anti‑bots | Cloudflare Turnstile |
+| Validación de esquema | PGlite (PostgreSQL real en memoria) |
 | Deploy | Vercel |
 
 ## Puesta en marcha
@@ -34,11 +36,59 @@ Abre <http://localhost:3000>. Si no hay credenciales configuradas la app entra e
 - Datos: `src/lib/parking/demo-data.ts` (generador determinista, sin hydration mismatch).
 - La interfaz muestra una insignia **«Datos demo»**.
 
+## Base de datos
+
+El modelo físico vive en `supabase/` y se aplica **en orden**. Cubre los 13 módulos
+del sistema; el detalle módulo por módulo está en [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
+
+```
+supabase/
+├─ 01_schema.sql                  # usuarios, sesiones, intentos de acceso, RBAC
+├─ 02_schema.sql                  # vehículos, autorizaciones, zonas, plazas, dispositivos
+├─ 03_schema.sql                  # eventos de acceso, ALPR, historial de ocupación
+├─ 04_schema.sql                  # alertas, auditoría, fallas, reportes, respaldos, push
+├─ 05_rls.sql                     # RLS sobre las 24 tablas (39 políticas)
+├─ 06_views.sql                   # KPIs + vistas de compatibilidad con el frontend
+└─ 07_seed.sql                    # roles, permisos, zonas, 116 plazas, hardware, vehículos
+```
+
+### Validar sin credenciales
+
+```bash
+npm run db:validate
+```
+
+Levanta un PostgreSQL real en memoria (PGlite), aplica los siete scripts y ejecuta
+**106 verificaciones**: inventario del esquema, seed, fail‑safe de la barrera,
+antirrebote, normalización de placas, sincronización de ocupación, deduplicación de
+alertas, inmutabilidad de la bitácora, bloqueo por intentos fallidos, RLS y contrato
+entre las vistas y `src/lib/parking/types.ts`.
+
+### Aplicar en un proyecto Supabase real
+
+```bash
+# .env.local
+DATABASE_URL=postgresql://postgres:...@db.TU_PROJECT.supabase.co:5432/postgres
+npm run db:push
+```
+
+También puedes pegar los scripts en el **SQL Editor** en el mismo orden.
+Requiere las extensiones `pgcrypto`, `citext` y `btree_gist` (se crean solas).
+
+### Puntos de seguridad del modelo
+
+- RLS activa en las 24 tablas y `security_invoker` en las vistas de compatibilidad.
+- `bitacora_auditoria` es inmutable por trigger: no admite `UPDATE` ni `DELETE`.
+- Fail‑safe: la barrera solo abre con vehículo autorizado y legible; ante cualquier
+  otra situación (incluido un dispositivo caído) queda cerrada.
+- Sin reconocimiento facial ni biometría; la evidencia vehicular son rutas, nunca `bytea`.
+- Las contraseñas las administra Supabase Auth; el modelo solo conserva un
+  `contrasena_hash` para migración.
+
 ## Configurar Supabase + Google
 
 1. Crea el proyecto en [supabase.com](https://supabase.com).
-2. Ejecuta `supabase/schema.sql` en el **SQL Editor**. Crea `zonas`, `espacios` y
-   `registros`, con RLS habilitado y datos iniciales de zona.
+2. Aplica el modelo con `npm run db:push` o con el SQL Editor.
 3. Copia **Project Settings → API**: `NEXT_PUBLIC_SUPABASE_URL` y
    `NEXT_PUBLIC_SUPABASE_ANON_KEY` a `.env.local`.
 4. En **Authentication → Providers → Google**:
@@ -69,6 +119,12 @@ callback de Google. El flujo es:
 ## Estructura
 
 ```
+supabase/                # modelo físico (ver arriba)
+scripts/
+├─ validar-bd.mjs        # 106 verificaciones sobre PGlite
+├─ aplicar-bd.mjs        # aplica el esquema a Supabase con DATABASE_URL
+└─ supabase-auth-shim.sql# emula auth.users/auth.uid/auth.jwt en las pruebas
+docs/CHECKLIST.md        # trazabilidad de los 13 módulos
 src/
 ├─ app/
 │  ├─ layout.tsx              # raíz, metadata, fuentes
@@ -98,11 +154,14 @@ src/
 ## Scripts
 
 ```bash
-npm run dev      # desarrollo
-npm run build    # build de producción
-npm run start    # sirve el build
-npm run lint     # ESLint
-npx tsc --noEmit # chequeo de tipos
+npm run dev         # desarrollo
+npm run build       # build de producción
+npm run start       # sirve el build
+npm run lint        # ESLint
+npm run typecheck   # tsc --noEmit
+npm run db:validate # aplica y verifica el esquema en PGlite
+npm run db:push     # aplica el esquema en Supabase (requiere DATABASE_URL)
+npm run verify      # typecheck + lint + db:validate + build
 ```
 
 ## Despliegue en Vercel
@@ -116,7 +175,11 @@ npx tsc --noEmit # chequeo de tipos
 
 ## Pendiente
 
-- [ ] Cargar el diseño definitivo del parqueo (filas, columnas, pasillos, sentido
-      de circulación, zonas y sinalización).
-- [ ] Sustituir el modo demo por datos reales de Supabase.
-- [ ] Módulo de registro de ingreso/salida desde la caseta o barrier.
+- [x] Modelo físico completo de los 13 módulos, con RLS, seed y validación automática.
+- [ ] Cargar el diseño definitivo del parqueo (plano SVG, pasillos, sentido de
+      circulación y señalización) en `zonas.plano_layout`.
+- [ ] Aplicar el esquema en un proyecto Supabase real y cargar las variables de
+      entorno para salir del modo demo.
+- [ ] Exponer los módulos 2, 3, 6, 9, 10, 11 y 13 en la interfaz (ver `docs/CHECKLIST.md`).
+- [ ] Suscripción Realtime para el monitoreo en vivo del dashboard.
+- [ ] Contrato de ingesta con el nodo edge y con el motor de visión artificial.
