@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+/*
+  Escuela Militar de Ingeniería (EMI) — identidad visual
+  Azul institucional + amarillo oro, con severidad por estado de espacio.
+*/
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Azules EMI */
+  --color-emi-950: #041028;
+  --color-emi-900: #071a3c;
+  --color-emi-800: #0b2a5b;
+  --color-emi-700: #113a7d;
+  --color-emi-600: #174ba0;
+  --color-emi-500: #1d5cc4;
+  --color-emi-400: #3b7fe0;
+  --color-emi-300: #7aa9ee;
+  --color-emi-200: #b7d0f7;
+  --color-emi-100: #dde8fd;
+  --color-emi-50: #f2f7ff;
+
+  /* Amarillo oro EMI */
+  --color-emi-gold-700: #a97b04;
+  --color-emi-gold-600: #cc9706;
+  --color-emi-gold-500: #f0b310;
+  --color-emi-gold-400: #ffc72c;
+  --color-emi-gold-300: #ffd766;
+  --color-emi-gold-200: #ffe9a8;
+  --color-emi-gold-100: #fff6dd;
+
+  /* Semánticos de parqueo */
+  --color-estado-libre: #12b76a;
+  --color-estado-ocupado: #ef4444;
+  --color-estado-reservado: #f0b310;
+  --color-estado-mantenimiento: #8b5cf6;
+
+  --radius-emi: 0.75rem;
+
+  --shadow-emi: 0 18px 40px -18px rgb(4 16 40 / 0.55);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-emi-950);
+    color: var(--color-emi-100);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-emi-gold-400);
+    color: var(--color-emi-950);
+  }
+}
+
+@layer utilities {
+  /* Fondo institucional: azul profundo con trama diagonal sutil */
+  .bg-emi-mesh {
+    background-color: var(--color-emi-950);
+    background-image:
+      radial-gradient(
+        ellipse 80% 60% at 12% -10%,
+        rgb(29 92 196 / 0.45),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 70% 55% at 88% 8%,
+        rgb(240 179 16 / 0.22),
+        transparent 62%
+      ),
+      linear-gradient(
+        135deg,
+        rgb(255 255 255 / 0.045) 25%,
+        transparent 25% 50%,
+        rgb(255 255 255 / 0.045) 50% 75%,
+        transparent 75%
+      );
+    background-size:
+      100% 100%,
+      100% 100%,
+      22px 22px;
+  }
+
+  /* Tarjeta de panel con borde dorado superior */
+  .panel-emi {
+    background-color: rgb(7 26 60 / 0.82);
+    border: 1px solid rgb(23 75 160 / 0.55);
+    border-radius: var(--radius-emi);
+    box-shadow: var(--shadow-emi);
+    backdrop-filter: blur(6px);
+  }
+
+  .text-gradient-gold {
+    background-image: linear-gradient(
+      100deg,
+      var(--color-emi-gold-300),
+      var(--color-emi-gold-400) 45%,
+      var(--color-emi-gold-600)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes emi-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(240 179 16 / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgb(240 179 16 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(240 179 16 / 0);
+  }
+}
+
+.anim-pulse-ring {
+  animation: emi-pulse-ring 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-pulse-ring {
+    animation: none;
+  }
+}
