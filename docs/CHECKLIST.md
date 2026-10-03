@@ -24,6 +24,21 @@ En Supabase, los scripts se aplican en orden en el SQL Editor:
 
 ---
 
+## Interfaz
+
+| Pieza | Estado | Detalle |
+| --- | --- | --- |
+| Portada institucional | `[x]` | `/`: hero con slider, noticias, unidades académicas, footer azul. |
+| Navegación con SISTEMA DE PARQUEO | `[x]` | `/sistema-parqueo` encabeza el menú, con dropdown y botón dorado. |
+| Landing del sistema | `[x]` | `/sistema-parqueo`: los 13 módulos, acceso, placas, alertas y reportes. |
+| Pantalla de acceso | `[x]` | `/login`: Google Workspace + Turnstile, tema claro institucional. |
+| Panel de monitoreo | `[x]` | `/dashboard`: KPIs, mapa de plazas, zonas e ingresos. |
+| Sistema de diseño EMI | `[x]` | `globals.css` con tokens de emi.edu.bo (Poppins, `#0D3669`, `#FDD000`). |
+| Pantallas de los módulos 2, 3, 6, 9, 10, 11 y 13 | `[ ]` | pendientes: hoy solo existen el panel y las landings informativas. |
+| Monitoreo en vivo (Realtime) | `[ ]` | pendiente de suscripción. |
+
+---
+
 ## Módulo 1 — Autenticación y gestión de usuarios
 
 | Pieza | Estado | Detalle |

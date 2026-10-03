@@ -4,7 +4,10 @@ Sistema de parqueo automático para la **Escuela Militar de Ingeniería** (La Pa
 Consulta de espacios disponibles en tiempo real, autenticación con Google Workspace
 y verificación anti‑robots con Cloudflare Turnstile.
 
-Identidad visual institucional: azul EMI + amarillo oro.
+El portal replica la identidad visual del sitio institucional **emi.edu.bo**: fondo
+blanco, Poppins en títulos, Helvetica en cuerpo, azul institucional `#0D3669`, botón
+azul `#3366FF` y dorado `#FDD000`. La entrada **SISTEMA DE PARQUEO** encabeza la
+navegación superior, igual que en el sitio original.
 
 ## Stack
 
@@ -17,6 +20,18 @@ Identidad visual institucional: azul EMI + amarillo oro.
 | Anti‑bots | Cloudflare Turnstile |
 | Validación de esquema | PGlite (PostgreSQL real en memoria) |
 | Deploy | Vercel |
+
+## Diseño visual
+
+`src/app/globals.css` declara los tokens extraídos de emi.edu.bo con `@theme`:
+
+- **Azules**: `--color-marine #0D3669` (secciones oscuras, footer, h2), `--color-marine-deep #164385` (h1), `--color-ink #113255` (cuerpo), `--color-brand #3366FF` / `--color-brand-hover #0037DD` (botón primario).
+- **Dorados**: `--color-gold #FDD000` (botón dorado), `--color-gold-soft`, `--color-gold-copy` (copyright), `--color-gold-deep #C89B00` (texto dorado sobre blanco, para contraste AA).
+- **Tipografía**: `font-heading` → Poppins; `font-sans` → Helvetica.
+- **Componentes**: `.contenedor` (1320px), `.titulo-seccion` (50/30 px), `.antetitulo`, `.btn`/`.btn-dorado`/`.btn-azul`, `.nav-enlace`, `.dropdown-item`, `.tarjeta`, `.tarjeta-overlay`, `.seccion-azul`.
+
+Los estados de plaza (`libre`, `ocupado`, `reservado`, `mantenimiento`, `sin_datos`)
+son colores semánticos añadidos aparte: el sitio original no usa rojo.
 
 ## Puesta en marcha
 
@@ -127,15 +142,22 @@ scripts/
 docs/CHECKLIST.md        # trazabilidad de los 13 módulos
 src/
 ├─ app/
-│  ├─ layout.tsx              # raíz, metadata, fuentes
-│  ├─ page.tsx                # redirige a /dashboard
+│  ├─ layout.tsx              # raíz, metadata, Poppins
+│  ├─ page.tsx                # portada institucional (hero, noticias, unidades)
+│  ├─ sistema-parqueo/page.tsx# landing completa del sistema de parqueo
 │  ├─ login/
 │  │  ├─ page.tsx             # pantalla de acceso
 │  │  └─ acciones.ts          # Server Actions (login / logout)
 │  ├─ auth/callback/route.ts  # intercambio de código OAuth + validación captcha
-│  └─ dashboard/page.tsx      # panel principal
+│  └─ dashboard/page.tsx      # panel de monitoreo
 ├─ components/
-│  ├─ emblema-emi.tsx         # escudo SVG
+│  ├─ emi/                    # capa visual institucional
+│  │  ├─ cabecera.tsx         # navegación sticky con dropdowns + SISTEMA DE PARQUEO
+│  │  ├─ pie.tsx              # footer azul del sitio
+│  │  ├─ portada.tsx          # slider del hero
+│  │  ├─ bloques.tsx          # secciones, tarjetas y datos del sitio
+│  │  └─ iconos.tsx           # iconos SVG inline
+│  ├─ emblema-emi.tsx         # escudo SVG con la paleta oficial
 │  ├─ login-form.tsx          # formulario Google + estado del captcha
 │  ├─ turnstile.tsx           # widget Turnstile (script on‑demand)
 │  ├─ mapa-parqueo.tsx        # grilla de espacios por zona + filtros
@@ -143,6 +165,7 @@ src/
 │  ├─ encabezado.tsx          # barra superior con usuario y logout
 │  └─ tabla-ingresos.tsx      # vehículos estacionados
 ├─ lib/
+│  ├─ emi/{navegacion,modulos}.ts  # menú, datos y catálogo de módulos
 │  ├─ supabase/{client,server}.ts
 │  ├─ parking/{types,demo-data,queries}.ts
 │  ├─ auth-cookies.ts
@@ -150,6 +173,16 @@ src/
 │  └─ fechas.ts
 └─ proxy.ts                   # refreshing de sesión + control de acceso
 ```
+
+## Rutas
+
+| Ruta | Acceso | Contenido |
+|------|--------|-----------|
+| `/` | Público | Portada institucional: hero con slider, noticias, unidades académicas. |
+| `/sistema-parqueo` | Público | Landing del sistema: los 13 módulos, acceso, placas, alertas y reportes. |
+| `/login` | Público | Autenticación con Google Workspace + Turnstile. |
+| `/dashboard` | Sesión | Panel de monitoreo: KPIs, mapa de plazas, zonas e ingresos. |
+| `/auth/callback` | OAuth | Intercambio del código de Google y consumo del captcha. |
 
 ## Scripts
 
@@ -176,10 +209,17 @@ npm run verify      # typecheck + lint + db:validate + build
 ## Pendiente
 
 - [x] Modelo físico completo de los 13 módulos, con RLS, seed y validación automática.
+- [x] Rediseño institucional replicando emi.edu.bo, con SISTEMA DE PARQUEO en la
+      navegación superior y landing propia en `/sistema-parqueo`.
+- [x] Panel de monitoreo y pantalla de acceso migrados al tema claro institucional.
 - [ ] Cargar el diseño definitivo del parqueo (plano SVG, pasillos, sentido de
       circulación y señalización) en `zonas.plano_layout`.
 - [ ] Aplicar el esquema en un proyecto Supabase real y cargar las variables de
       entorno para salir del modo demo.
-- [ ] Exponer los módulos 2, 3, 6, 9, 10, 11 y 13 en la interfaz (ver `docs/CHECKLIST.md`).
+- [ ] Pantallas operativas de los módulos 2, 3, 6, 9, 10, 11 y 13 (ver
+      `docs/CHECKLIST.md`): hoy se documentan y enganchan datos, pero solo el panel
+      tiene interfaz completa.
+- [ ] Sustituir los degradados de `portada.tsx` por las fotografías del campus
+      cuando sedisponga de los archivos originales.
 - [ ] Suscripción Realtime para el monitoreo en vivo del dashboard.
 - [ ] Contrato de ingesta con el nodo edge y con el motor de visión artificial.

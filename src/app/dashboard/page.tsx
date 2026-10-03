@@ -2,10 +2,25 @@ import { MapaParqueo } from "@/components/mapa-parqueo";
 import { Metricas, ResumenZonas } from "@/components/metricas";
 import { Encabezado } from "@/components/encabezado";
 import { TablaIngresos } from "@/components/tabla-ingresos";
+import { Pie } from "@/components/emi/pie";
 import { cargarParqueo } from "@/lib/parking/queries";
 import { formatearFechaHora } from "@/lib/fechas";
+import { ETIQUETA_ESTADO } from "@/lib/parking/types";
+import type { EstadoEspacio } from "@/lib/parking/types";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "Panel de monitoreo",
+};
+
+const PUNTOS: Record<EstadoEspacio, string> = {
+  libre: "bg-libre",
+  ocupado: "bg-ocupado",
+  reservado: "bg-reservado",
+  mantenimiento: "bg-mantenimiento",
+  sin_datos: "bg-sin-datos",
+};
 
 export default async function DashboardPage() {
   const { zonas, espacios, resumen, registros, origen } = await cargarParqueo();
@@ -16,17 +31,38 @@ export default async function DashboardPage() {
   const actualizado = formatearFechaHora(new Date(ahora).toISOString());
 
   return (
-    <div className="bg-emi-mesh flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col bg-cloud/40">
       <Encabezado
         origen={origen}
         actualizado={actualizado}
         libres={resumen.libres}
       />
 
-      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      {/* Título del panel */}
+      <div className="border-b border-line bg-white">
+        <div className="contenedor py-6">
+          <p className="antetitulo">SISTEMA DE PARQUEO</p>
+          <h1 className="titulo-seccion !text-[2rem] !leading-[2.25rem]">
+            PANEL DE MONITOREO
+          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+            {(Object.keys(ETIQUETA_ESTADO) as EstadoEspacio[]).map((estado) => (
+              <span
+                key={estado}
+                className="flex items-center gap-2 text-[13px] text-ink/70"
+              >
+                <span className={`h-2.5 w-2.5 ${PUNTOS[estado]}`} />
+                {ETIQUETA_ESTADO[estado]}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <main className="contenedor flex-1 py-6">
         <Metricas resumen={resumen} />
 
-        <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_340px]">
+        <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_360px]">
           <MapaParqueo zonas={zonas} espacios={espacios} />
           <div className="space-y-6">
             <ResumenZonas zonas={zonas} espacios={espacios} />
@@ -35,10 +71,7 @@ export default async function DashboardPage() {
         </div>
       </main>
 
-      <footer className="border-t border-emi-800/70 px-6 py-4 text-center text-xs text-emi-500">
-        Escuela Militar de Ingeniería · Sistema de Parqueo Automático · La Paz,
-        Bolivia
-      </footer>
+      <Pie />
     </div>
   );
 }

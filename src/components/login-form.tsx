@@ -23,15 +23,15 @@ export function LoginForm({ siteKey, modoDesarrollo }: Props) {
         <button
           type="submit"
           disabled={!habilitado}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-emi-700 bg-emi-800/70 px-5 py-3.5 font-semibold text-white transition enabled:hover:border-emi-gold-500 enabled:hover:bg-emi-700 disabled:cursor-not-allowed disabled:opacity-45"
+          className="btn btn-azul w-full justify-center !py-3.5 disabled:cursor-not-allowed disabled:opacity-45"
         >
           <GoogleIcon />
           Continuar con Google
         </button>
       </form>
 
-      <p className="mt-5 text-center text-xs leading-relaxed text-emi-500">
-        Al continuar aceptás el tratamiento de datos personales de la institución.
+      <p className="mt-5 text-center text-xs leading-relaxed text-ink/55">
+        Al continuar aceptas el tratamiento de datos personales de la institución.
         La verificación anti‑robots es obligatoria.
       </p>
     </div>

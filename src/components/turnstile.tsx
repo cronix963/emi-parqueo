@@ -82,7 +82,7 @@ export function TurnstileWidget({ siteKey, onToken, modoDesarrollo = false }: Pr
 
         widgetId.current = window.turnstile.render(contenedor.current, {
           sitekey: siteKey,
-          theme: "dark",
+          theme: "light",
           language: "es",
           appearance: "interaction-only",
           callback: (token: string) => {
@@ -91,13 +91,13 @@ export function TurnstileWidget({ siteKey, onToken, modoDesarrollo = false }: Pr
           },
           "expired-callback": () => onToken(null),
           "error-callback": () => {
-            setError("No se pudo completar la verificación. Intentá de nuevo.");
+            setError("No se pudo completar la verificación. Intenta de nuevo.");
             onToken(null);
           },
         });
       } catch {
         if (!cancelado) {
-          setError("No se pudo cargar la verificación de seguridad. Revisá tu conexión.");
+          setError("No se pudo cargar la verificación de seguridad. Revisa tu conexión.");
           onToken(null);
         }
       }
@@ -118,17 +118,17 @@ export function TurnstileWidget({ siteKey, onToken, modoDesarrollo = false }: Pr
     return (
       <div
         data-testid="turnstile-dev"
-        className="flex items-center gap-3 rounded-xl border border-emi-gold-500/50 bg-emi-900/70 px-4 py-3"
+        className="flex items-center gap-3 border border-gold/60 bg-gold/12 px-4 py-3"
       >
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-emi-gold-400 font-bold text-emi-950">
+        <span className="grid h-6 w-6 shrink-0 place-items-center bg-gold font-heading font-bold text-marine-deep">
           ✓
         </span>
         <div className="text-sm leading-tight">
-          <p className="font-semibold text-emi-100">
+          <p className="font-heading font-semibold text-marine">
             No soy un robot{" "}
-            <span className="font-normal text-emi-300">(modo desarrollo)</span>
+            <span className="font-body font-normal text-ink/60">(modo desarrollo)</span>
           </p>
-          <p className="text-emi-400">
+          <p className="text-ink/60">
             Activado sin claves de Cloudflare Turnstile.
           </p>
         </div>
@@ -139,10 +139,10 @@ export function TurnstileWidget({ siteKey, onToken, modoDesarrollo = false }: Pr
   return (
     <div className="flex flex-col items-start gap-2">
       <div ref={contenedor} />
-      <p className="text-xs text-emi-400">
+      <p className="text-xs text-ink/55">
         La verificación es obligatoria para iniciar sesión.
       </p>
-      {error ? <p className="text-xs text-red-400">{error}</p> : null}
+      {error ? <p className="text-xs text-ocupado">{error}</p> : null}
     </div>
   );
 }
